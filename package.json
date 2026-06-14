@@ -1,0 +1,76 @@
+{
+    "name": "mypassword",
+    "version": "1.0.0",
+    "description": "MyPassword - A modern self-hosted password manager",
+    "license": "MIT",
+    "main": "dist/main/main.js",
+    "productName": "MyPassword",
+    "scripts": {
+        "dev": "concurrently -k \"npm:dev:main\" \"npm:dev:renderer\"",
+        "dev:main": "tsc -p tsconfig.main.json && electron .",
+        "dev:renderer": "vite",
+        "build": "tsc -p tsconfig.main.json && vite build",
+        "pack": "npm run build && electron-builder --mac --win",
+        "pack:mac": "npm run build && electron-builder --mac",
+        "pack:win": "npm run build && electron-builder --win",
+        "start": "electron .",
+        "rebuild": "npx @electron/rebuild -f -w better-sqlite3",
+        "postinstall": "npx @electron/rebuild -f -w better-sqlite3"
+    },
+    "build": {
+        "appId": "com.mypassword.app",
+        "productName": "MyPassword",
+        "directories": {
+            "output": "release"
+        },
+        "files": [
+            "dist/**/*",
+            "node_modules/**/*",
+            "package.json"
+        ],
+        "mac": {
+            "category": "public.app-category.utilities",
+            "icon": "build/icon.icns",
+            "target": [
+                {
+                    "target": "dmg",
+                    "arch": ["arm64", "x64"]
+                }
+            ]
+        },
+        "dmg": {
+            "title": "MyPassword"
+        },
+        "win": {
+            "icon": "build/icon.ico",
+            "target": [
+                {
+                    "target": "portable",
+                    "arch": ["x64"]
+                }
+            ]
+        }
+    },
+    "dependencies": {
+        "better-sqlite3": "^11.7.0"
+    },
+    "devDependencies": {
+        "@electron/rebuild": "^4.0.4",
+        "@types/better-sqlite3": "^7.6.12",
+        "@types/node": "^22.10.0",
+        "@types/react": "^18.3.12",
+        "@types/react-dom": "^18.3.1",
+        "@vitejs/plugin-react": "^4.3.4",
+        "autoprefixer": "^10.4.20",
+        "concurrently": "^9.1.0",
+        "electron": "^33.2.0",
+        "electron-builder": "^26.15.3",
+        "electron-rebuild": "^3.2.9",
+        "postcss": "^8.4.49",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "tailwindcss": "^3.4.16",
+        "typescript": "^5.7.2",
+        "vite": "^6.0.3"
+    }
+}
