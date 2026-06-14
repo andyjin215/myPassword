@@ -558,10 +558,12 @@ function startRpcServer() {
 
         const url = new URL(req.url || '/', `http://127.0.0.1:${RPC_PORT}`);
         const path = url.pathname;
+        const fullPath = req.url || '/';  // Full path including query string, for HMAC verification
         const method = req.method || 'GET';
 
         // Read body with size limit
         let body: any = {};
+        let rawBody = '';  // Raw body string for HMAC verification
         if (method === 'POST') {
             const raw = await new Promise<string>((resolve, reject) => {
                 let data = '';
@@ -582,7 +584,8 @@ function startRpcServer() {
                 return null;
             });
             if (raw === null) return; // Already responded with 413
-            try { body = raw ? JSON.parse(raw) : {}; } catch { body = {}; }
+            rawBody = raw || '';
+            try { body = rawBody ? JSON.parse(rawBody) : {}; } catch { body = {}; }
         }
 
         // Parse query params
@@ -635,9 +638,9 @@ function startRpcServer() {
                 return;
             }
 
-            const bodyStr = typeof body === 'object' ? JSON.stringify(body) : '';
+            const bodyStr = rawBody;
             const bodyHash = crypto.createHash('sha256').update(bodyStr).digest('hex');
-            const messageToSign = `${timestamp}:${method}:${path}:${bodyHash}`;
+            const messageToSign = `${timestamp}:${method}:${fullPath}:${bodyHash}`;
 
             const expectedSig = crypto
                 .createHmac('sha256', storedSeed)

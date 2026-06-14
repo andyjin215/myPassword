@@ -370,23 +370,15 @@
             renderItems(allItems);
             itemsStatus.classList.add('hidden');
         } catch (err) {
-            if (err.message && err.message.includes('Unknown extension')) {
-                // Pairing invalidated — go back to pair screen
-                showState('pair');
-                return;
-            }
-            // Auth-related errors — vault is effectively locked, show unlock screen
             if (err.message && (
+                err.message.includes('Unknown extension') ||
                 err.message.includes('Authentication required') ||
                 err.message.includes('Invalid signature') ||
                 err.message.includes('Missing auth')
             )) {
-                showState('unlock');
-                passwordIn.value = '';
-                unlockStatus.classList.remove('hidden', 'success');
-                unlockStatus.classList.add('error');
-                unlockStatus.textContent = t('authRequired');
-                passwordIn.focus();
+                // Extension auth failed — pairing is invalid or stale, need to re-pair
+                await chrome.storage.local.remove(['extensionId', 'hmacSeed']);
+                showState('pair');
                 return;
             }
             itemsStatus.textContent = err.message || t('failedLoad');
